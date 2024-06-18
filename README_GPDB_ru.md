@@ -2,7 +2,7 @@
 
 # 1. Поддерживаемые версии Greenplum
 
-На данный момент поддерживается только [Greenplum 6](https://docs.vmware.com/en/VMware-Greenplum/6/greenplum-database/landing-index.html).
+На данный момент поддерживается [Greenplum 6](https://docs.vmware.com/en/VMware-Greenplum/6/greenplum-database/landing-index.html) и [Greenplum 7](https://docs.vmware.com/en/VMware-Greenplum/7/greenplum-database/landing-index.html).
 
 # 2. Компиляция pgBackRest
 
@@ -21,6 +21,12 @@ apt-get update
 apt-get install git gcc openssl-devel libxml2-devel bzip2-devel libzstd-devel liblz4-devel libyaml-devel zlib-devel libssh2-devel
 ```
 
+для Ubuntu 22.04
+```
+apt-get update
+apt-get install gcc git libbz2-dev liblz4-dev libssh2-1-dev libssl-dev libxml2-dev libyaml-dev libzstd-dev pkg-config zlib1g-dev
+```
+
 - Установить переменные окружения
 
 В `PATH` должен быть путь к `pg_config` Greenplum, а в `LD_LIBRARY_PATH` - путь к `libpq.so.5`.
@@ -31,7 +37,7 @@ source <GPDB_DIR>/greenplum_path.sh
 
 - Скачать репозиторий
 ```
-git clone https://github.com/arenadata/pgbackrest -b 2.50-ci
+git clone https://github.com/arenadata/pgbackrest -b 2.52-ci
 ```
 
 - Перейти в каталог с исходным кодом
@@ -76,9 +82,9 @@ mkdir -p /tmp/backup/log
 
 - Создать конфигурационный файл
 
-В дальнейших примерах команд предполагается, что конфигурационный файл имеет стандартное имя - `/etc/pgbackrest.conf`. Если требуется использовать другой файл, то его имя можно передать через параметр `--config`. Для **стандартного демонстрационного кластера**, созданного с `DATADIRS=/tmp/gpdb`, команда создания конфигурационного файла потребует права суперпользователя и будет выглядеть так:
+В дальнейших примерах команд предполагается, что конфигурационный файл имеет стандартное имя - `/etc/pgbackrest.conf`. Если требуется использовать другой файл, то его имя можно передать через параметр `--config`. Для **стандартного демонстрационного кластера**, созданного с `DATADIRS=/tmp/gpdb`, команда создания конфигурационного файла для GreenPlum 6 потребует права суперпользователя и будет выглядеть так:
 ```
-cat <<EOF > /etc/pgbackrest.conf
+sudo tee /etc/pgbackrest.conf <<EOF
 [seg-1]
 pg1-path=/tmp/gpdb/qddir/demoDataDir-1
 pg1-port=6000
@@ -102,7 +108,7 @@ start-fast=y
 fork=GPDB
 EOF
 ```
-
+Для Greenplum 7 в приведенной команде требуется заменить номера портов с 6000, 6002, 6003, 6004 на 7000, 7002, 7003, 7004 соответственно.
 Так как данная версия pgBackRest может применяться для бэкапа как PostgreSQL, так и Greenplum, следует указать в параметре `fork`, бэкап какой СУБД выполняется. Описание остальных параметров можно найти в [документации](https://pgbackrest.org/configuration.html) или в `build/help/help.xml`.
 
 - Создать и инициализировать для координатора и каждого первичного сегмента каталоги, в которых будут храниться файлы для восстановления
@@ -121,7 +127,7 @@ gpconfig -c archive_command -v "'PGOPTIONS=\"-c gp_session_role=utility\" /usr/l
 gpstop -ar
 ```
 
-- Установить расширение gp_pitr
+- Установить расширение gp_pitr (для GreenPlum 7 это выполнять не требуется)
 
 Выполнить приведенный ниже запрос в любом клиентском приложении, например в psql.
 ```
@@ -178,10 +184,18 @@ rm -rf /tmp/gpdb/qddir/demoDataDir-1/* /tmp/gpdb/dbfast1/demoDataDir0/* /tmp/gpd
 - Восстановить из резервной копии содержимое каталогов координатора и первичных сегментов
 
 Имя точки восстановления из пункта 4.2 передается в параметре `--target`.
+Команда для Greenplum 6:
 ```
 for i in -1 0 1 2
 do 
     pgbackrest --stanza=seg$i --type=name --target=backup1 restore
+done
+```
+В Greenplum 7 появился конфигурационный параметр `recovery_target_action`, который определяет действие после достижения точки восстановления. По умолчанию установлено значение `pause`, которое останавливает процесс восстановления, ожидая дополнительных указаний. Для автоматического запуска кластера после восстановления, необходимо изменить это значение на `promote`. Это можно сделать, добавив параметр в gpconfig, либо указать его непосредственно при восстановлении:
+```
+for i in -1 0 1 2
+do 
+    pgbackrest --stanza=seg$i --type=name --target=backup1 --target-action=promote restore
 done
 ```
 
