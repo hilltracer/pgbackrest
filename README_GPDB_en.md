@@ -233,6 +233,7 @@ gprecoverseg -aF
 ```
 gpinitstandby -as $HOSTNAME -S /tmp/gpdb/standby -P 6001
 ```
+For Greenplum 7, in the above command, replace the port number 6001 with 7001.
 
 - Make sure that all cluster components are restored and working
 
