@@ -10,22 +10,28 @@
 
 Приведенные ниже команды установки требуется выполнить от имени суперпользователя.
 
-для CentOS 7:
+<details> <summary> Команда для CentOS 7 </summary>   
+
 ```
 yum install git gcc openssl-devel libxml2-devel bzip2-devel libzstd-devel lz4-devel libyaml-devel zlib-devel libssh2-devel
 ```
+</details>
 
-для ALT Linux p10
+<details> <summary> Команда для ALT Linux p10 </summary>
+
 ```
 apt-get update
 apt-get install git gcc openssl-devel libxml2-devel bzip2-devel libzstd-devel liblz4-devel libyaml-devel zlib-devel libssh2-devel
 ```
+</details>
 
-для Ubuntu 22.04
+<details> <summary> Команда для Ubuntu 22.04 </summary>
+
 ```
 apt-get update
 apt-get install gcc git libbz2-dev liblz4-dev libssh2-1-dev libssl-dev libxml2-dev libyaml-dev libzstd-dev pkg-config zlib1g-dev
 ```
+</details>
 
 - Установить переменные окружения
 
@@ -82,7 +88,10 @@ mkdir -p /tmp/backup/log
 
 - Создать конфигурационный файл
 
-В дальнейших примерах команд предполагается, что конфигурационный файл имеет стандартное имя - `/etc/pgbackrest.conf`. Если требуется использовать другой файл, то его имя можно передать через параметр `--config`. Для **стандартного демонстрационного кластера**, созданного с `DATADIRS=/tmp/gpdb`, команда создания конфигурационного файла для GreenPlum 6 потребует права суперпользователя и будет выглядеть так:
+В дальнейших примерах команд предполагается, что конфигурационный файл имеет стандартное имя - `/etc/pgbackrest.conf`. Если требуется использовать другой файл, то его имя можно передать через параметр `--config`. Для **стандартного демонстрационного кластера**, созданного с `DATADIRS=/tmp/gpdb`, команда создания конфигурационного файла потребует права суперпользователя и будет выглядеть так:
+
+<details> <summary> Команда для GreenPlum 6 </summary>
+
 ```
 sudo tee /etc/pgbackrest.conf <<EOF
 [seg-1]
@@ -108,7 +117,37 @@ start-fast=y
 fork=GPDB
 EOF
 ```
-Для Greenplum 7 в приведенной команде требуется заменить номера портов с 6000, 6002, 6003, 6004 на 7000, 7002, 7003, 7004 соответственно.
+</details>
+
+<details> <summary> Команда для GreenPlum 7 </summary>
+
+```
+sudo tee /etc/pgbackrest.conf <<EOF
+[seg-1]
+pg1-path=/tmp/gpdb/qddir/demoDataDir-1
+pg1-port=7000
+
+[seg0]
+pg1-path=/tmp/gpdb/dbfast1/demoDataDir0
+pg1-port=7002
+
+[seg1]
+pg1-path=/tmp/gpdb/dbfast2/demoDataDir1
+pg1-port=7003
+
+[seg2]
+pg1-path=/tmp/gpdb/dbfast3/demoDataDir2
+pg1-port=7004
+
+[global]
+repo1-path=/tmp/backup
+log-path=/tmp/backup/log
+start-fast=y
+fork=GPDB
+EOF
+```
+</details>
+
 Так как данная версия pgBackRest может применяться для бэкапа как PostgreSQL, так и Greenplum, следует указать в параметре `fork`, бэкап какой СУБД выполняется. Описание остальных параметров можно найти в [документации](https://pgbackrest.org/configuration.html) или в `build/help/help.xml`.
 
 - Создать и инициализировать для координатора и каждого первичного сегмента каталоги, в которых будут храниться файлы для восстановления
@@ -127,7 +166,7 @@ gpconfig -c archive_command -v "'PGOPTIONS=\"-c gp_session_role=utility\" /usr/l
 gpstop -ar
 ```
 
-- Установить расширение gp_pitr (для GreenPlum 7 это выполнять не требуется)
+- Установить расширение gp_pitr (для GreenPlum 7 пропустить этот шаг)
 
 Выполнить приведенный ниже запрос в любом клиентском приложении, например в psql.
 ```
@@ -184,20 +223,28 @@ rm -rf /tmp/gpdb/qddir/demoDataDir-1/* /tmp/gpdb/dbfast1/demoDataDir0/* /tmp/gpd
 - Восстановить из резервной копии содержимое каталогов координатора и первичных сегментов
 
 Имя точки восстановления из пункта 4.2 передается в параметре `--target`.
-Команда для Greenplum 6:
+<details> <summary> Команда для Greenplum 6 </summary>
+
 ```
 for i in -1 0 1 2
 do 
     pgbackrest --stanza=seg$i --type=name --target=backup1 restore
 done
 ```
-В Greenplum 7 появился конфигурационный параметр `recovery_target_action`, который определяет действие после достижения точки восстановления. По умолчанию установлено значение `pause`, которое останавливает процесс восстановления, ожидая дополнительных указаний. Для автоматического запуска кластера после восстановления, необходимо изменить это значение на `promote`. Это можно сделать, добавив параметр в gpconfig, либо указать его непосредственно при восстановлении:
+</details>
+
+<details> <summary> Команда для  Greenplum 7 </summary>
+
 ```
 for i in -1 0 1 2
 do 
     pgbackrest --stanza=seg$i --type=name --target=backup1 --target-action=promote restore
 done
 ```
+В Greenplum 7 появился конфигурационный параметр `recovery_target_action`, который определяет действие после достижения точки восстановления. По умолчанию установлено значение `pause`, которое останавливает процесс восстановления, ожидая дополнительных указаний. Для автоматического запуска кластера после восстановления, необходимо изменить это значение на `promote`. 
+</details>
+
+
 
 - Запустить только координатор
 ```
@@ -230,10 +277,20 @@ gprecoverseg -aF
 ```
 
 - Восстановить резервный координатор
+
+<details> <summary> Команда для Greenplum 6 </summary>
+
 ```
 gpinitstandby -as $HOSTNAME -S /tmp/gpdb/standby -P 6001
 ```
-Для Greenplum 7 в приведенной команде заменить номер порта 6001 на 7001.
+</details>
+
+<details> <summary> Команда для Greenplum 7 </summary>
+
+```
+gpinitstandby -as $HOSTNAME -S /tmp/gpdb/standby -P 7001
+```
+</details>
 
 - Убедиться, что все компоненты кластера восстановились и работают
 
