@@ -165,7 +165,7 @@ gpconfig -c archive_command -v "'PGOPTIONS=\"-c gp_session_role=utility\" /usr/l
 gpstop -ar
 ```
 
-- Install the gp_pitr extension (skip this step for GreenPlum 7)
+- Install the gp_pitr extension (skip this step for Greenplum 7)
 
 Run the query below in any client application, for example in psql.
 ```

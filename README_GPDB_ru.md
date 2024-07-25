@@ -90,7 +90,7 @@ mkdir -p /tmp/backup/log
 
 В дальнейших примерах команд предполагается, что конфигурационный файл имеет стандартное имя - `/etc/pgbackrest.conf`. Если требуется использовать другой файл, то его имя можно передать через параметр `--config`. Для **стандартного демонстрационного кластера**, созданного с `DATADIRS=/tmp/gpdb`, команда создания конфигурационного файла потребует права суперпользователя и будет выглядеть так:
 
-<details> <summary> Команда для GreenPlum 6 </summary>
+<details> <summary> Команда для Greenplum 6 </summary>
 
 ```
 sudo tee /etc/pgbackrest.conf <<EOF
@@ -119,7 +119,7 @@ EOF
 ```
 </details>
 
-<details> <summary> Команда для GreenPlum 7 </summary>
+<details> <summary> Команда для Greenplum 7 </summary>
 
 ```
 sudo tee /etc/pgbackrest.conf <<EOF
@@ -166,7 +166,7 @@ gpconfig -c archive_command -v "'PGOPTIONS=\"-c gp_session_role=utility\" /usr/l
 gpstop -ar
 ```
 
-- Установить расширение gp_pitr (для GreenPlum 7 пропустить этот шаг)
+- Установить расширение gp_pitr (для Greenplum 7 пропустить этот шаг)
 
 Выполнить приведенный ниже запрос в любом клиентском приложении, например в psql.
 ```
