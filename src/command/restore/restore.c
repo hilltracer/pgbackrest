@@ -2156,8 +2156,8 @@ restoreJobResult(
             {
                 *currentPercentComplete = percentComplete;
                 lockWriteDataP(
-                    lockTypeRestore, .percentComplete = VARUINT(*currentPercentComplete), .sizeComplete = VARUINT64(sizeRestored),
-                    .size = VARUINT64(sizeTotal));
+                    lockTypeRestore, .percentComplete = *currentPercentComplete, .sizeComplete = sizeRestored,
+                    .size = sizeTotal);
             }
         }
         MEM_CONTEXT_TEMP_END();

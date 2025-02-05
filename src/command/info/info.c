@@ -264,7 +264,7 @@ stanzaStatus(const int code, const InfoStanzaRepo *const stanzaData, const Varia
         kvPut(backupLockKv, STATUS_KEY_LOCK_SIZE_VAR, VARUINT64(stanzaData->backupLock.size));
 
         if (cfgOptionStrId(cfgOptOutput) != CFGOPTVAL_OUTPUT_JSON)
-            kvPut(backupLockKv, STATUS_KEY_LOCK_PERCENT_COMPLETE_VAR, VARUINT(stanzaData->backupLock.percentComplete));
+            kvPut(backupLockKv, STATUS_KEY_LOCK_PERCENT_COMPLETE_VAR, VARUINT64(stanzaData->backupLock.percentComplete));
     }
 
     KeyValue *const restoreLockKv = kvPutKv(lockKv, STATUS_KEY_LOCK_RESTORE_VAR);
@@ -276,7 +276,7 @@ stanzaStatus(const int code, const InfoStanzaRepo *const stanzaData, const Varia
         kvPut(restoreLockKv, STATUS_KEY_LOCK_SIZE_VAR, VARUINT64(stanzaData->restoreLock.size));
 
         if (cfgOptionStrId(cfgOptOutput) != CFGOPTVAL_OUTPUT_JSON)
-            kvPut(restoreLockKv, STATUS_KEY_LOCK_PERCENT_COMPLETE_VAR, VARUINT(stanzaData->restoreLock.percentComplete));
+            kvPut(restoreLockKv, STATUS_KEY_LOCK_PERCENT_COMPLETE_VAR, VARUINT64(stanzaData->restoreLock.percentComplete));
     }
 
     FUNCTION_TEST_RETURN_VOID();
@@ -1325,7 +1325,7 @@ infoUpdateStanzaLock(InfoStanzaLock *const stanzaLock, const String *const stanz
     // If a backup lock check has not already been performed, then do so
     if (!stanzaLock->checked)
     {
-        const LockReadResult result = lockRead(cfgOptionStr(cfgOptLockPath), stanzaName, lockType);
+        const LockReadResult result = cmdLockRead(cfgOptionStr(cfgOptLockPath), stanzaName, lockType);
         // If there is a valid lock for this stanza then backup/expire/restore must be running
         stanzaLock->held = result.status == lockReadStatusValid;
         stanzaLock->checked = true;
