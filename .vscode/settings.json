@@ -1,0 +1,16 @@
+{
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#510c5f",
+    },
+    "files.associations": {
+        "*.out": "shellscript",
+        "helper.h": "c",
+        "file.h": "c",
+        "storage.intern.h": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "typeinfo": "c"
+    },
+}
