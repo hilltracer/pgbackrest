@@ -399,6 +399,14 @@ option:
     command-role:
       main: {}
 
+  skip-wal-range:
+    type: boolean
+    default: false
+    command:
+      info: {}
+    command-role:
+      main: {}
+
   stanza:
     type: string
     command:

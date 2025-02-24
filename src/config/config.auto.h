@@ -115,6 +115,7 @@ Option constants
 #define CFGOPT_SCK_BLOCK                                            "sck-block"
 #define CFGOPT_SCK_KEEP_ALIVE                                       "sck-keep-alive"
 #define CFGOPT_SET                                                  "set"
+#define CFGOPT_SKIP_WAL_RANGE                                       "skip-wal-range"
 #define CFGOPT_SORT                                                 "sort"
 #define CFGOPT_SPOOL_PATH                                           "spool-path"
 #define CFGOPT_STANZA                                               "stanza"
@@ -138,7 +139,7 @@ Option constants
 #define CFGOPT_TYPE                                                 "type"
 #define CFGOPT_VERBOSE                                              "verbose"
 
-#define CFG_OPTION_TOTAL                                            182
+#define CFG_OPTION_TOTAL                                            183
 
 /***********************************************************************************************************************************
 Option value constants
@@ -551,6 +552,7 @@ typedef enum
     cfgOptSckBlock,
     cfgOptSckKeepAlive,
     cfgOptSet,
+    cfgOptSkipWalRange,
     cfgOptSort,
     cfgOptSpoolPath,
     cfgOptStanza,

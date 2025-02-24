@@ -2614,6 +2614,16 @@
                         <example>20150131-153358F_20150131-153401I</example>
                     </option>
 
+                    <option id="skip-wal-range" name="Skip Wal Range">
+                        <summary>Skip the scanning of WAL ranges.</summary>
+
+                        <text>
+                            <p>Enabling this option skips scanning for write-ahead log (WAL) archives during the execution of the info command. It reduces execution time and resource usage.</p>
+                        </text>
+
+                        <example>y</example>
+                    </option>
+
                     <option id="type" name="Type">
                         <summary>Filter on backup type.</summary>
 

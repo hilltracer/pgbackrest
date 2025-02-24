@@ -333,7 +333,7 @@ Set the data for the archive section of the stanza for the database info from th
 static void
 archiveDbList(
     const String *const stanza, const InfoPgData *const pgData, VariantList *const archiveSection, const InfoArchive *const info,
-    const bool currentDb, const unsigned int repoIdx, const unsigned int repoKey)
+    const bool currentDb, const unsigned int repoIdx, const unsigned int repoKey, const bool skipWalRange)
 {
     FUNCTION_TEST_BEGIN();
         FUNCTION_TEST_PARAM(STRING, stanza);
@@ -342,6 +342,7 @@ archiveDbList(
         FUNCTION_TEST_PARAM(BOOL, currentDb);
         FUNCTION_TEST_PARAM(UINT, repoIdx);
         FUNCTION_TEST_PARAM(UINT, repoKey);
+        FUNCTION_TEST_PARAM(BOOL, skipWalRange);
     FUNCTION_TEST_END();
 
     FUNCTION_AUDIT_HELPER();
@@ -361,47 +362,50 @@ archiveDbList(
     Variant *const archiveInfo = varNewKv(kvNew());
     const Storage *const storageRepo = storageRepoIdx(repoIdx);
 
-    // Get a list of WAL directories in the archive repo from oldest to newest, if any exist
-    const StringList *const walDir = strLstSort(
-        storageListP(storageRepo, archivePath, .expression = WAL_SEGMENT_DIR_REGEXP_STR), sortOrderAsc);
-
-    if (!strLstEmpty(walDir))
+    if(!skipWalRange)
     {
-        // Not every WAL dir has WAL files so check each
-        for (unsigned int idx = 0; idx < strLstSize(walDir); idx++)
-        {
-            // Get a list of all WAL in this WAL dir and sort the list from oldest to newest to get the oldest starting WAL archived
-            // for this db
-            const StringList *const list = strLstSort(
-                storageListP(
-                    storageRepo, strNewFmt("%s/%s", strZ(archivePath), strZ(strLstGet(walDir, idx))),
-                    .expression = WAL_SEGMENT_FILE_REGEXP_STR),
-                sortOrderAsc);
+        // Get a list of WAL directories in the archive repo from oldest to newest, if any exist
+        const StringList *const walDir = strLstSort(
+            storageListP(storageRepo, archivePath, .expression = WAL_SEGMENT_DIR_REGEXP_STR), sortOrderAsc);
 
-            // If wal segments are found, get the oldest one as the archive start
-            if (!strLstEmpty(list))
+        if (!strLstEmpty(walDir))
+        {
+            // Not every WAL dir has WAL files so check each
+            for (unsigned int idx = 0; idx < strLstSize(walDir); idx++)
             {
-                archiveStart = strSubN(strLstGet(list, 0), 0, 24);
-                break;
+                // Get a list of all WAL in this WAL dir and sort the list from oldest to newest to get the oldest starting WAL archived
+                // for this db
+                const StringList *const list = strLstSort(
+                    storageListP(
+                        storageRepo, strNewFmt("%s/%s", strZ(archivePath), strZ(strLstGet(walDir, idx))),
+                        .expression = WAL_SEGMENT_FILE_REGEXP_STR),
+                    sortOrderAsc);
+
+                // If wal segments are found, get the oldest one as the archive start
+                if (!strLstEmpty(list))
+                {
+                    archiveStart = strSubN(strLstGet(list, 0), 0, 24);
+                    break;
+                }
             }
-        }
 
-        // Iterate through the directory list in reverse processing newest first. Cast comparison to an int for readability.
-        for (unsigned int idx = strLstSize(walDir) - 1; (int)idx >= 0; idx--)
-        {
-            // Get a list of all WAL in this WAL dir and sort the list from newest to oldest to get the newest ending WAL archived
-            // for this db
-            const StringList *const list = strLstSort(
-                storageListP(
-                    storageRepo, strNewFmt("%s/%s", strZ(archivePath), strZ(strLstGet(walDir, idx))),
-                    .expression = WAL_SEGMENT_FILE_REGEXP_STR),
-                sortOrderDesc);
-
-            // If wal segments are found, get the newest one as the archive stop
-            if (!strLstEmpty(list))
+            // Iterate through the directory list in reverse processing newest first. Cast comparison to an int for readability.
+            for (unsigned int idx = strLstSize(walDir) - 1; (int)idx >= 0; idx--)
             {
-                archiveStop = strSubN(strLstGet(list, 0), 0, 24);
-                break;
+                // Get a list of all WAL in this WAL dir and sort the list from newest to oldest to get the newest ending WAL archived
+                // for this db
+                const StringList *const list = strLstSort(
+                    storageListP(
+                        storageRepo, strNewFmt("%s/%s", strZ(archivePath), strZ(strLstGet(walDir, idx))),
+                        .expression = WAL_SEGMENT_FILE_REGEXP_STR),
+                    sortOrderDesc);
+
+                // If wal segments are found, get the newest one as the archive stop
+                if (!strLstEmpty(list))
+                {
+                    archiveStop = strSubN(strLstGet(list, 0), 0, 24);
+                    break;
+                }
             }
         }
     }
@@ -707,7 +711,7 @@ Set the stanza data for each stanza found in the repo
 static VariantList *
 stanzaInfoList(
     List *const stanzaRepoList, const String *const backupLabel, const unsigned int repoIdxMin,
-    const unsigned int repoIdxMax, const bool progressOnly)
+    const unsigned int repoIdxMax, const bool progressOnly, const bool skipWalRange)
 {
     FUNCTION_TEST_BEGIN();
         FUNCTION_TEST_PARAM(LIST, stanzaRepoList);
@@ -715,6 +719,7 @@ stanzaInfoList(
         FUNCTION_TEST_PARAM(UINT, repoIdxMin);
         FUNCTION_TEST_PARAM(UINT, repoIdxMax);
         FUNCTION_TEST_PARAM(BOOL, progressOnly);
+        FUNCTION_TEST_PARAM(BOOL, skipWalRange);
     FUNCTION_TEST_END();
 
     FUNCTION_AUDIT_HELPER();
@@ -791,7 +796,7 @@ stanzaInfoList(
                         // Get the archive info for the DB from the archive.info file
                         archiveDbList(
                             stanzaData->name, &pgData, archiveSection, repoData->archiveInfo, (pgIdx == 0 ? true : false),
-                            repoIdx, repoData->key);
+                            repoIdx, repoData->key, skipWalRange);
                     }
 
                     // Set stanza status if the current db sections do not match across repos
@@ -1426,6 +1431,9 @@ infoRender(void)
         // Is only progress output requested?
         const bool progressOnly = cfgOptionBool(cfgOptProgressOnly);
 
+        // Skip the scan of WAL ranges?
+        const bool skipWalRange = cfgOptionBool(cfgOptSkipWalRange);
+
         // Get stanza if specified
         const String *const stanza = cfgOptionStrNull(cfgOptStanza);
 
@@ -1611,7 +1619,7 @@ infoRender(void)
 
         // If the backup storage exists, then search for and process any stanzas
         if (!lstEmpty(stanzaRepoList))
-            infoList = stanzaInfoList(stanzaRepoList, backupLabel, repoIdxMin, repoIdxMax, progressOnly);
+            infoList = stanzaInfoList(stanzaRepoList, backupLabel, repoIdxMin, repoIdxMax, progressOnly, skipWalRange);
 
         // Format text output
         if (cfgOptionStrId(cfgOptOutput) == CFGOPTVAL_OUTPUT_TEXT)
