@@ -34,6 +34,12 @@ testRun(void)
         hrnCfgArgRawZ(argList, cfgOptOutput, "json");
         HRN_CFG_LOAD(cfgCmdInfo, argList);
 
+        StringList *argListSkipWalRange = strLstDup(argList);
+        hrnCfgArgRawZ(argListSkipWalRange, cfgOptSkipWalRange, "y");
+
+        StringList *argListTextSkipWalRange = strLstDup(argListText);
+        hrnCfgArgRawZ(argListTextSkipWalRange, cfgOptSkipWalRange, "y");
+
         StringList *argListProgressOnly = strLstDup(argList);
         hrnCfgArgRawZ(argListProgressOnly, cfgOptProgressOnly, "y");
 
@@ -818,6 +824,148 @@ testRun(void)
                     // {uncrustify_on}
                     "json - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
 
+                HRN_CFG_LOAD(cfgCmdInfo, argListSkipWalRange);
+                TEST_RESULT_STR_Z(
+                    infoRender(),
+                    // {uncrustify_off - indentation}
+                    "["
+                        "{"
+                             "\"archive\":["
+                                "{"
+                                    "\"database\":{"
+                                        "\"id\":1,"
+                                        "\"repo-key\":1"
+                                    "},"
+                                    "\"id\":\"9.6-1\","
+                                    "\"max\":null,"
+                                    "\"min\":null"
+                                "},"
+                                "{"
+                                    "\"database\":{"
+                                        "\"id\":2,"
+                                        "\"repo-key\":1"
+                                    "},"
+                                    "\"id\":\"9.5-2\","
+                                    "\"max\":null,"
+                                    "\"min\":null"
+                                "},"
+                                "{"
+                                    "\"database\":{"
+                                        "\"id\":3,"
+                                        "\"repo-key\":1"
+                                    "},"
+                                    "\"id\":\"9.6-3\","
+                                    "\"max\":null,"
+                                    "\"min\":null"
+                                "}"
+                            "],"
+                             "\"backup\":["
+                                "{"
+                                    "\"archive\":{"
+                                        "\"start\":null,"
+                                        "\"stop\":null"
+                                    "},"
+                                    "\"backrest\":{"
+                                        "\"format\":5,"
+                                        "\"version\":\"2.04\""
+                                    "},"
+                                    "\"database\":{"
+                                        "\"id\":1,"
+                                        "\"repo-key\":1"
+                                    "},"
+                                    "\"info\":{"
+                                        "\"delta\":26897030,"
+                                        "\"repository\":{"
+                                            "\"delta\":3159,"
+                                            "\"size\":3159776"
+                                        "},"
+                                        "\"size\":26897030"
+                                    "},"
+                                    "\"label\":\"20181116-154756F\","
+                                    "\"prior\":null,"
+                                    "\"reference\":null,"
+                                    "\"timestamp\":{"
+                                        "\"start\":1542383276,"
+                                        "\"stop\":1542383289"
+                                    "},"
+                                    "\"type\":\"full\""
+                                "},"
+                                "{"
+                                    "\"archive\":{"
+                                        "\"start\":\"000000030000000000000001\","
+                                        "\"stop\":\"000000030000000000000001\""
+                                    "},"
+                                    "\"backrest\":{"
+                                        "\"format\":5,"
+                                        "\"version\":\"2.30\""
+                                    "},"
+                                    "\"database\":{"
+                                        "\"id\":3,"
+                                        "\"repo-key\":1"
+                                    "},"
+                                    "\"info\":{"
+                                        "\"delta\":26897033,"
+                                        "\"repository\":{"
+                                            "\"delta\":3159,"
+                                            "\"size\":3159776"
+                                        "},"
+                                        "\"size\":26897033"
+                                    "},"
+                                    "\"label\":\"20201116-154900F\","
+                                    "\"prior\":null,"
+                                    "\"reference\":null,"
+                                    "\"timestamp\":{"
+                                        "\"start\":1605541676,"
+                                        "\"stop\":1605541680"
+                                    "},"
+                                    "\"type\":\"full\""
+                                "}"
+                            "],"
+                             "\"cipher\":\"none\","
+                             "\"db\":["
+                                "{"
+                                    "\"id\":1,"
+                                    "\"repo-key\":1,"
+                                    "\"system-id\":6569239123849665679,"
+                                    "\"version\":\"9.6\""
+                                "},"
+                                "{"
+                                    "\"id\":2,"
+                                    "\"repo-key\":1,"
+                                    "\"system-id\":6569239123849665666,"
+                                    "\"version\":\"9.5\""
+                                "},"
+                                "{"
+                                    "\"id\":3,"
+                                    "\"repo-key\":1,"
+                                    "\"system-id\":6569239123849665679,"
+                                    "\"version\":\"9.6\""
+                                "}"
+                            "],"
+                            "\"name\":\"stanza1\","
+                            "\"repo\":["
+                                "{"
+                                    "\"cipher\":\"none\","
+                                    "\"key\":1,"
+                                    "\"status\":{"
+                                        "\"code\":0,"
+                                        "\"message\":\"ok\""
+                                    "}"
+                                "}"
+                            "],"
+                            "\"status\":{"
+                                "\"code\":0,"
+                                "\"lock\":{"
+                                    "\"backup\":{\"held\":true},"
+                                    "\"restore\":{\"held\":false}"
+                                "},"
+                                "\"message\":\"ok\""
+                            "}"
+                        "}"
+                    "]",
+                    // {uncrustify_on}
+                    "json (skip wal range) - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
+
                 HRN_CFG_LOAD(cfgCmdInfo, argListProgressOnly);
                 TEST_RESULT_STR_Z(
                     infoRender(),
@@ -863,6 +1011,32 @@ testRun(void)
                     "            database size: 25.7MB, database backup size: 25.7MB\n"
                     "            repo1: backup set size: 3MB, backup size: 3KB\n",
                     "text - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
+
+                HRN_CFG_LOAD(cfgCmdInfo, argListTextSkipWalRange);
+                TEST_RESULT_STR_Z(
+                    infoRender(),
+                    "stanza: stanza1\n"
+                    "    status: ok (backup/expire running)\n"
+                    "    cipher: none\n"
+                    "\n"
+                    "    db (prior)\n"
+                    "        wal archive min/max (9.5): none present\n"
+                    "\n"
+                    "    db (current)\n"
+                    "        wal archive min/max (9.6): none present\n"
+                    "\n"
+                    "        full backup: 20181116-154756F\n"
+                    "            timestamp start/stop: 2018-11-16 15:47:56+00 / 2018-11-16 15:48:09+00\n"
+                    "            wal start/stop: n/a\n"
+                    "            database size: 25.7MB, database backup size: 25.7MB\n"
+                    "            repo1: backup set size: 3MB, backup size: 3KB\n"
+                    "\n"
+                    "        full backup: 20201116-154900F\n"
+                    "            timestamp start/stop: 2020-11-16 15:47:56+00 / 2020-11-16 15:48:00+00\n"
+                    "            wal start/stop: 000000030000000000000001 / 000000030000000000000001\n"
+                    "            database size: 25.7MB, database backup size: 25.7MB\n"
+                    "            repo1: backup set size: 3MB, backup size: 3KB\n",
+                    "text (skip wal range) - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
 
                 HRN_CFG_LOAD(cfgCmdInfo, argListTextProgressOnly);
                 TEST_RESULT_STR_Z(
