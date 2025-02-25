@@ -362,7 +362,7 @@ archiveDbList(
     Variant *const archiveInfo = varNewKv(kvNew());
     const Storage *const storageRepo = storageRepoIdx(repoIdx);
 
-    if(!skipWalRange)
+    if (!skipWalRange)
     {
         // Get a list of WAL directories in the archive repo from oldest to newest, if any exist
         const StringList *const walDir = strLstSort(
@@ -373,7 +373,8 @@ archiveDbList(
             // Not every WAL dir has WAL files so check each
             for (unsigned int idx = 0; idx < strLstSize(walDir); idx++)
             {
-                // Get a list of all WAL in this WAL dir and sort the list from oldest to newest to get the oldest starting WAL archived
+                // Get a list of all WAL in this WAL dir and sort the list from oldest to newest to get the oldest starting WAL
+                // archived
                 // for this db
                 const StringList *const list = strLstSort(
                     storageListP(
@@ -392,7 +393,8 @@ archiveDbList(
             // Iterate through the directory list in reverse processing newest first. Cast comparison to an int for readability.
             for (unsigned int idx = strLstSize(walDir) - 1; (int)idx >= 0; idx--)
             {
-                // Get a list of all WAL in this WAL dir and sort the list from newest to oldest to get the newest ending WAL archived
+                // Get a list of all WAL in this WAL dir and sort the list from newest to oldest to get the newest ending WAL
+                // archived
                 // for this db
                 const StringList *const list = strLstSort(
                     storageListP(
