@@ -825,30 +825,16 @@ testRun(void)
                     "json - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
 
                 HRN_CFG_LOAD(cfgCmdInfo, argListSkipWalRange);
+                // Only the database with id=3 is displayed in the archive section because it is the only one associated with a
+                // backup that includes WAL archive information.
+                // Other databases are omitted due to the absence of WAL archives or backups, and the --skip-wal-range option
+                // prevents scanning for additional WAL files in the repository.
                 TEST_RESULT_STR_Z(
                     infoRender(),
                     // {uncrustify_off - indentation}
                     "["
                         "{"
                              "\"archive\":["
-                                "{"
-                                    "\"database\":{"
-                                        "\"id\":1,"
-                                        "\"repo-key\":1"
-                                    "},"
-                                    "\"id\":\"9.6-1\","
-                                    "\"max\":null,"
-                                    "\"min\":null"
-                                "},"
-                                "{"
-                                    "\"database\":{"
-                                        "\"id\":2,"
-                                        "\"repo-key\":1"
-                                    "},"
-                                    "\"id\":\"9.5-2\","
-                                    "\"max\":null,"
-                                    "\"min\":null"
-                                "},"
                                 "{"
                                     "\"database\":{"
                                         "\"id\":3,"
@@ -1012,15 +998,16 @@ testRun(void)
                     "            repo1: backup set size: 3MB, backup size: 3KB\n",
                     "text - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
 
+                // Display only the current database because no prior databases contain WAL archives or backups.
+                // The --skip-wal-range option prevents scanning for WAL files, so only databases explicitly linked to backups
+                // appear in the output.
+                // The full backup 20201116-154900F includes WAL start/stop information, making it the only visible archive.
                 HRN_CFG_LOAD(cfgCmdInfo, argListTextSkipWalRange);
                 TEST_RESULT_STR_Z(
                     infoRender(),
                     "stanza: stanza1\n"
                     "    status: ok (backup/expire running)\n"
                     "    cipher: none\n"
-                    "\n"
-                    "    db (prior)\n"
-                    "        wal archive min/max (9.5): none present\n"
                     "\n"
                     "    db (current)\n"
                     "        wal archive min/max (9.6): none present\n"
