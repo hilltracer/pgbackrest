@@ -333,7 +333,7 @@ Set the data for the archive section of the stanza for the database info from th
 static void
 archiveDbList(
     const String *const stanza, const InfoPgData *const pgData, VariantList *const archiveSection, const InfoArchive *const info,
-    const bool currentDb, const unsigned int repoIdx, const unsigned int repoKey, const bool skipWalRange)
+    const bool currentDb, const unsigned int repoIdx, const unsigned int repoKey, const bool walRange)
 {
     FUNCTION_TEST_BEGIN();
         FUNCTION_TEST_PARAM(STRING, stanza);
@@ -342,7 +342,7 @@ archiveDbList(
         FUNCTION_TEST_PARAM(BOOL, currentDb);
         FUNCTION_TEST_PARAM(UINT, repoIdx);
         FUNCTION_TEST_PARAM(UINT, repoKey);
-        FUNCTION_TEST_PARAM(BOOL, skipWalRange);
+        FUNCTION_TEST_PARAM(BOOL, walRange);
     FUNCTION_TEST_END();
 
     FUNCTION_AUDIT_HELPER();
@@ -362,7 +362,7 @@ archiveDbList(
     Variant *const archiveInfo = varNewKv(kvNew());
     const Storage *const storageRepo = storageRepoIdx(repoIdx);
 
-    if (!skipWalRange)
+    if (walRange)
     {
         // Get a list of WAL directories in the archive repo from oldest to newest, if any exist
         const StringList *const walDir = strLstSort(
@@ -711,7 +711,7 @@ Set the stanza data for each stanza found in the repo
 static VariantList *
 stanzaInfoList(
     List *const stanzaRepoList, const String *const backupLabel, const unsigned int repoIdxMin,
-    const unsigned int repoIdxMax, const bool progressOnly, const bool skipWalRange)
+    const unsigned int repoIdxMax, const bool progressOnly, const bool walRange)
 {
     FUNCTION_TEST_BEGIN();
         FUNCTION_TEST_PARAM(LIST, stanzaRepoList);
@@ -719,7 +719,7 @@ stanzaInfoList(
         FUNCTION_TEST_PARAM(UINT, repoIdxMin);
         FUNCTION_TEST_PARAM(UINT, repoIdxMax);
         FUNCTION_TEST_PARAM(BOOL, progressOnly);
-        FUNCTION_TEST_PARAM(BOOL, skipWalRange);
+        FUNCTION_TEST_PARAM(BOOL, walRange);
     FUNCTION_TEST_END();
 
     FUNCTION_AUDIT_HELPER();
@@ -796,7 +796,7 @@ stanzaInfoList(
                         // Get the archive info for the DB from the archive.info file
                         archiveDbList(
                             stanzaData->name, &pgData, archiveSection, repoData->archiveInfo, (pgIdx == 0 ? true : false),
-                            repoIdx, repoData->key, skipWalRange);
+                            repoIdx, repoData->key, walRange);
                     }
 
                     // Set stanza status if the current db sections do not match across repos
@@ -1431,8 +1431,8 @@ infoRender(void)
         // Is only progress output requested?
         const bool progressOnly = cfgOptionBool(cfgOptProgressOnly);
 
-        // Skip the scan of WAL ranges?
-        const bool skipWalRange = cfgOptionBool(cfgOptSkipWalRange);
+        // Is the scan of WAL ranges needed?
+        const bool walRange = cfgOptionBool(cfgOptWalRange);
 
         // Get stanza if specified
         const String *const stanza = cfgOptionStrNull(cfgOptStanza);
@@ -1619,7 +1619,7 @@ infoRender(void)
 
         // If the backup storage exists, then search for and process any stanzas
         if (!lstEmpty(stanzaRepoList))
-            infoList = stanzaInfoList(stanzaRepoList, backupLabel, repoIdxMin, repoIdxMax, progressOnly, skipWalRange);
+            infoList = stanzaInfoList(stanzaRepoList, backupLabel, repoIdxMin, repoIdxMax, progressOnly, walRange);
 
         // Format text output
         if (cfgOptionStrId(cfgOptOutput) == CFGOPTVAL_OUTPUT_TEXT)

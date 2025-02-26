@@ -9891,30 +9891,6 @@ static const ParseRuleOption parseRuleOption[CFG_OPTION_TOTAL] =
         ),                                                                                                                // opt/set
     ),                                                                                                                    // opt/set
     // -----------------------------------------------------------------------------------------------------------------------------
-    PARSE_RULE_OPTION                                                                                          // opt/skip-wal-range
-    (                                                                                                          // opt/skip-wal-range
-        PARSE_RULE_OPTION_NAME("skip-wal-range"),                                                              // opt/skip-wal-range
-        PARSE_RULE_OPTION_TYPE(cfgOptTypeBoolean),                                                             // opt/skip-wal-range
-        PARSE_RULE_OPTION_REQUIRED(true),                                                                      // opt/skip-wal-range
-        PARSE_RULE_OPTION_SECTION(cfgSectionCommandLine),                                                      // opt/skip-wal-range
-                                                                                                               // opt/skip-wal-range
-        PARSE_RULE_OPTION_COMMAND_ROLE_MAIN_VALID_LIST                                                         // opt/skip-wal-range
-        (                                                                                                      // opt/skip-wal-range
-            PARSE_RULE_OPTION_COMMAND(cfgCmdInfo)                                                              // opt/skip-wal-range
-        ),                                                                                                     // opt/skip-wal-range
-                                                                                                               // opt/skip-wal-range
-        PARSE_RULE_OPTIONAL                                                                                    // opt/skip-wal-range
-        (                                                                                                      // opt/skip-wal-range
-            PARSE_RULE_OPTIONAL_GROUP                                                                          // opt/skip-wal-range
-            (                                                                                                  // opt/skip-wal-range
-                PARSE_RULE_OPTIONAL_DEFAULT                                                                    // opt/skip-wal-range
-                (                                                                                              // opt/skip-wal-range
-                    PARSE_RULE_VAL_BOOL_FALSE,                                                                 // opt/skip-wal-range
-                ),                                                                                             // opt/skip-wal-range
-            ),                                                                                                 // opt/skip-wal-range
-        ),                                                                                                     // opt/skip-wal-range
-    ),                                                                                                         // opt/skip-wal-range
-    // -----------------------------------------------------------------------------------------------------------------------------
     PARSE_RULE_OPTION                                                                                                    // opt/sort
     (                                                                                                                    // opt/sort
         PARSE_RULE_OPTION_NAME("sort"),                                                                                  // opt/sort
@@ -10792,6 +10768,31 @@ static const ParseRuleOption parseRuleOption[CFG_OPTION_TOTAL] =
             ),                                                                                                        // opt/verbose
         ),                                                                                                            // opt/verbose
     ),                                                                                                                // opt/verbose
+    // -----------------------------------------------------------------------------------------------------------------------------
+    PARSE_RULE_OPTION                                                                                               // opt/wal-range
+    (                                                                                                               // opt/wal-range
+        PARSE_RULE_OPTION_NAME("wal-range"),                                                                        // opt/wal-range
+        PARSE_RULE_OPTION_TYPE(cfgOptTypeBoolean),                                                                  // opt/wal-range
+        PARSE_RULE_OPTION_NEGATE(true),                                                                             // opt/wal-range
+        PARSE_RULE_OPTION_REQUIRED(true),                                                                           // opt/wal-range
+        PARSE_RULE_OPTION_SECTION(cfgSectionCommandLine),                                                           // opt/wal-range
+                                                                                                                    // opt/wal-range
+        PARSE_RULE_OPTION_COMMAND_ROLE_MAIN_VALID_LIST                                                              // opt/wal-range
+        (                                                                                                           // opt/wal-range
+            PARSE_RULE_OPTION_COMMAND(cfgCmdInfo)                                                                   // opt/wal-range
+        ),                                                                                                          // opt/wal-range
+                                                                                                                    // opt/wal-range
+        PARSE_RULE_OPTIONAL                                                                                         // opt/wal-range
+        (                                                                                                           // opt/wal-range
+            PARSE_RULE_OPTIONAL_GROUP                                                                               // opt/wal-range
+            (                                                                                                       // opt/wal-range
+                PARSE_RULE_OPTIONAL_DEFAULT                                                                         // opt/wal-range
+                (                                                                                                   // opt/wal-range
+                    PARSE_RULE_VAL_BOOL_TRUE,                                                                       // opt/wal-range
+                ),                                                                                                  // opt/wal-range
+            ),                                                                                                      // opt/wal-range
+        ),                                                                                                          // opt/wal-range
+    ),                                                                                                              // opt/wal-range
 };
 
 /***********************************************************************************************************************************
@@ -11139,7 +11140,6 @@ static const uint8_t optionResolveOrder[] =
     cfgOptSckBlock,                                                                                             // opt-resolve-order
     cfgOptSckKeepAlive,                                                                                         // opt-resolve-order
     cfgOptSet,                                                                                                  // opt-resolve-order
-    cfgOptSkipWalRange,                                                                                         // opt-resolve-order
     cfgOptSort,                                                                                                 // opt-resolve-order
     cfgOptSpoolPath,                                                                                            // opt-resolve-order
     cfgOptStartFast,                                                                                            // opt-resolve-order
@@ -11157,6 +11157,7 @@ static const uint8_t optionResolveOrder[] =
     cfgOptTlsServerPort,                                                                                        // opt-resolve-order
     cfgOptType,                                                                                                 // opt-resolve-order
     cfgOptVerbose,                                                                                              // opt-resolve-order
+    cfgOptWalRange,                                                                                             // opt-resolve-order
     cfgOptArchiveCheck,                                                                                         // opt-resolve-order
     cfgOptArchiveCopy,                                                                                          // opt-resolve-order
     cfgOptArchiveModeCheck,                                                                                     // opt-resolve-order

@@ -34,11 +34,11 @@ testRun(void)
         hrnCfgArgRawZ(argList, cfgOptOutput, "json");
         HRN_CFG_LOAD(cfgCmdInfo, argList);
 
-        StringList *argListSkipWalRange = strLstDup(argList);
-        hrnCfgArgRawZ(argListSkipWalRange, cfgOptSkipWalRange, "y");
+        StringList *argListNoWalRange = strLstDup(argList);
+        hrnCfgArgRawZ(argListNoWalRange, cfgOptWalRange, "n");
 
-        StringList *argListTextSkipWalRange = strLstDup(argListText);
-        hrnCfgArgRawZ(argListTextSkipWalRange, cfgOptSkipWalRange, "y");
+        StringList *argListTextNoWalRange = strLstDup(argListText);
+        hrnCfgArgRawZ(argListTextNoWalRange, cfgOptWalRange, "n");
 
         StringList *argListProgressOnly = strLstDup(argList);
         hrnCfgArgRawZ(argListProgressOnly, cfgOptProgressOnly, "y");
@@ -824,10 +824,10 @@ testRun(void)
                     // {uncrustify_on}
                     "json - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
 
-                HRN_CFG_LOAD(cfgCmdInfo, argListSkipWalRange);
+                HRN_CFG_LOAD(cfgCmdInfo, argListNoWalRange);
                 // Only the database with id=3 is displayed in the archive section because it is the only one associated with a
                 // backup that includes WAL archive information.
-                // Other databases are omitted due to the absence of WAL archives or backups, and the --skip-wal-range option
+                // Other databases are omitted due to the absence of WAL archives or backups, and the --no-wal-range option
                 // prevents scanning for additional WAL files in the repository.
                 TEST_RESULT_STR_Z(
                     infoRender(),
@@ -950,7 +950,7 @@ testRun(void)
                         "}"
                     "]",
                     // {uncrustify_on}
-                    "json (skip wal range) - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
+                    "json (no wal range) - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
 
                 HRN_CFG_LOAD(cfgCmdInfo, argListProgressOnly);
                 TEST_RESULT_STR_Z(
@@ -999,10 +999,10 @@ testRun(void)
                     "text - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
 
                 // Display only the current database because no prior databases contain WAL archives or backups.
-                // The --skip-wal-range option prevents scanning for WAL files, so only databases explicitly linked to backups
+                // The --no-wal-range option prevents scanning for WAL files, so only databases explicitly linked to backups
                 // appear in the output.
                 // The full backup 20201116-154900F includes WAL start/stop information, making it the only visible archive.
-                HRN_CFG_LOAD(cfgCmdInfo, argListTextSkipWalRange);
+                HRN_CFG_LOAD(cfgCmdInfo, argListTextNoWalRange);
                 TEST_RESULT_STR_Z(
                     infoRender(),
                     "stanza: stanza1\n"
@@ -1023,7 +1023,7 @@ testRun(void)
                     "            wal start/stop: 000000030000000000000001 / 000000030000000000000001\n"
                     "            database size: 25.7MB, database backup size: 25.7MB\n"
                     "            repo1: backup set size: 3MB, backup size: 3KB\n",
-                    "text (skip wal range) - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
+                    "text (no wal range) - single stanza, valid backup, no priors, no archives in latest DB, backup/expire lock detected");
 
                 HRN_CFG_LOAD(cfgCmdInfo, argListTextProgressOnly);
                 TEST_RESULT_STR_Z(
