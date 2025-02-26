@@ -374,8 +374,7 @@ archiveDbList(
             for (unsigned int idx = 0; idx < strLstSize(walDir); idx++)
             {
                 // Get a list of all WAL in this WAL dir and sort the list from oldest to newest to get the oldest starting WAL
-                // archived
-                // for this db
+                // archived for this db
                 const StringList *const list = strLstSort(
                     storageListP(
                         storageRepo, strNewFmt("%s/%s", strZ(archivePath), strZ(strLstGet(walDir, idx))),
@@ -394,8 +393,7 @@ archiveDbList(
             for (unsigned int idx = strLstSize(walDir) - 1; (int)idx >= 0; idx--)
             {
                 // Get a list of all WAL in this WAL dir and sort the list from newest to oldest to get the newest ending WAL
-                // archived
-                // for this db
+                // archived for this db
                 const StringList *const list = strLstSort(
                     storageListP(
                         storageRepo, strNewFmt("%s/%s", strZ(archivePath), strZ(strLstGet(walDir, idx))),
